@@ -13,18 +13,44 @@
 		<li><a href="final.html">Final Report</a></li>
 	</ul>
 </div>
+<div id="sidenav">
+	<ul>
+		<li><a href="#summary">Summary</a></li>
+		<li><a href="#background">Background</a></li>
+		<li><a href="#challenge">The Challenge</a></li>
+		<li><a href="#resources">Resources</a></li>
+		<li><a href="#goals">Goals and Deliverables</a></li>
+		<li><a href="#platform">Platform Choice</a></li>
+		<li><a href="schedule">Proposed Schedule</a></li>
+	</ul>
+</div>
 <div id="content">
 	<div id="summary">
 		<h1>Summary</h1>
-		<p>Our summary is going to go here</p>
+		<p>We plan on writing a photo mosaic creation tool using CUDA to do image computation on the GPU. This final product will accept an image as input, and using Instagram photos, will construct a photo mosaic of the input image using these photos</p>
 	</div>
 	<div id="background">
 		<h1>Background</h1>
-		<p>Our background explanation will go here</p>
+		<p>Instagram has a lot of publicly available photos, and with their many filters, these photos frequently take on a certain hue or a prevailing color. One popular way for people to display photos is to create one photo using a mosaic of much smaller photos where each of the smaller photos acts as “pixels” in the overall photo. With the popularity of Instagram, we believe that we can make very high quality photo mosaics using publically available photos.</p>
+		<p>As we have discussed before, photo computation can be done in parallel over the many individual pixels in a photo. With a mosaic, each sub-photo can be computed in parallel with the final result compiled together after all sub-photos have been computed. We can also benefit from parallelism by storing image data into separate caches which will contain those photos that match a given pattern, color, or brightness. Figure 1 shows an example of how we will cut up an input image into equal sized squares to create a mosaic.</p>
+		<h2>Pseudo-Code</h2>
+		<pre>
+Load provided image
+    Slice image into squares of equal size
+    for each sub-image in parallel:
+        calculate some overall pattern for the image
+        for each stored photo in parallel:
+            compare photo patterns and update shared pattern-match percentage
+            cache data about each stored image?
+        syncthreads
+        add photo pixels to shared final image buffer
+    	</pre>
 	</div>
 	<div id="challenge">
 		<h1>The Challenge</h1>
-		<p>The challenge section goes here</p>
+		<p>There is a lot of computation happening here. First of all we need to load the images into memory to process them. As we know from Project 2 this is a very bandwidth limited process. This is furthered by the fact that the photos requested from Instagram will most likely need to be downloaded locally to process which limits us to the speed of the network and Instagram’s servers. We also have the issue of space as Instagram’s database of images is far larger than we would ever hope to store in disk, let alone memory. We will need to come up with a method to process the images and store much smaller chunks of data to search through when doing our mosaic creation computation. Even going through this database will likely take a very long time, so we will need to find opportunities for caching when sub-photos with similar patterns come up. </p>
+		<h2>Potential Problems</h2>
+		<p>One potential issue we are concerned about is the speed at which the Instagram API responds. We hope to use "recent" photos in our mosaic, so the resulting image will be different each time, but this may not be possible with network delay. If this is the case we will need to store a large amount of photos somewhere on disk and access those instead. This poses a problem of storage and whether or not it is feasible to store such a large amount of photos on AWS. We may need to have a way that processes photos, stores information about them, and then simply stores the location of the photo on instagrams servers. This way we could do all of the photo computation very quickly, and only request photo downloads when we need to.</p>
 	</div>
 	<div id="resources">
 		<h1>Resources</h1>

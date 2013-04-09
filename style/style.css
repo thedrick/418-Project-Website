@@ -1,6 +1,10 @@
+body {
+	background-color: #eee;
+}
+
 #content {
-	width: 800px;
-	margin: 0 auto;
+	width: 700px;
+	margin: 70px auto 0 auto;
 	font: 12px 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
@@ -9,12 +13,23 @@ h1 {
 	margin: 10px 0;
 }
 
+h2 {
+	font: 18px 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	margin: 5px 0;
+}
+
+pre {
+	font: 14px 'Courier New', 'Courier';
+	line-height: 140%;
+}
+
 ul {
 	list-style: none;
-	width: 800px;
-	margin: 0 auto;
+	width: 100%;
 	text-align: center;
 	background-color: #333;
+	position: fixed;
+	top: 0;
 }
 
 li {
@@ -27,8 +42,49 @@ li {
 a {
 	color: white;
 	text-decoration: none;
+	font: 16px 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+p {
+	font: 14px 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	padding: 5px 0;
+	line-height: 130%;
 }
 
 a:hover {
+	color: #75BF00;
+}
+
+#sidenav li:first-child {
+	border-top: none;
+}
+
+#sidenav li {
+	display: block;
+	padding: 10px 0;
+	margin: 0;
+	border-bottom: 1px solid #eee;
+	border-top: 1px solid #333;
+	text-align: center;
+}
+
+#sidenav ul {
+	position: fixed;
+	top: 70px;
+	left: 20px;
+	background-color: white;
+	/*text-align: left;*/
+	width: 200px;
+	background-color: #fff;
+	border-radius: 6px;
+	overflow: hidden;
+	border: 1px solid #333;
+}
+
+#sidenav a {
+	color: #333;
+}
+
+#sidenav a:hover {
 	color: #75BF00;
 }
