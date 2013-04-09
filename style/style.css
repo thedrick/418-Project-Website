@@ -135,27 +135,25 @@ a:hover {
   border: 0px;
 }
 
-#resources ul {
+ul.resourceList {
 	position: relative;
-	width: auto;
-	height: auto;
 	background-color: transparent;
 	text-align: left;
-	color: black;
-	list-style-type: square;
-	list-style: square;
+	color: #000;
 	overflow: inherit;
 }
 
-#resources li {
-	color: black;
-	list-style: square;
-	font: 14px 'Helvetica Neue', Helvetica, Arial, sans-serif;
-	line-height: 150%;
+ul.resourceList > li {
+	color: #000;
+  display: list-item;
+	list-style-type: circle;
+  list-style: square;
+	font: 12px 'Armata', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	line-height: 115%;
 }
-
 #resources a {
 	color: #75BF00;
+  font-size: 12px;
 }
 
 #resources a:hover {
