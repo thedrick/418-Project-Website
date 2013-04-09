@@ -112,12 +112,12 @@ a:hover {
 #scheduleTab .left {
   background: #f0f0f0;
   float: left;
-  width: 210px;
+  width: 150px;
   padding: 6px;
 }
 #scheduleTab .right {
   float: right;
-  width: 440px;
+  width: 520px;
   padding: 6px;
 }
 .week {
