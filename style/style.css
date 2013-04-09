@@ -5,16 +5,16 @@ body {
 #content {
 	width: 700px;
 	margin: 70px auto 0 auto;
-	font: 12px 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	font: 12px 'Armata','Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 h1 {
-	font: 24px 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	font: 24px 'Armata', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 	margin: 10px 0;
 }
 
 h2 {
-	font: 18px 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	font: 18px 'Armata', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 	margin: 5px 0;
 }
 
@@ -42,11 +42,11 @@ li {
 a {
 	color: white;
 	text-decoration: none;
-	font: 16px 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	font: 16px 'Armata', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 p {
-	font: 14px 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	font: 14px 'PT Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 	padding: 5px 0;
 	line-height: 130%;
 }
@@ -87,4 +87,29 @@ a:hover {
 
 #sidenav a:hover {
 	color: #75BF00;
+}
+#scheduleTab {
+  width: 680px;
+  margin: 15px auto;
+}
+#scheduleTab .left {
+  background: #f0f0f0;
+  float: left;
+  width: 210px;
+  padding: 6px;
+  border-right: 1px #333 solid;
+}
+#scheduleTab .right {
+  float: right;
+  width: 440px;
+  padding: 6px;
+}
+.week {
+  display: block;
+  overflow: hidden;
+  padding: 10px 0;
+}
+#scheduleTab > .details {
+  padding: 6px;
+  border: 0px;
 }

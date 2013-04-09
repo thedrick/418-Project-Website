@@ -4,6 +4,8 @@
 	<title>Photo Mosaic Creation using CUDA</title>
 	<link rel="stylesheet" type="text/css" href="style/reset.css">
 	<link rel="stylesheet" type="text/css" href="style/style.css">
+  <link href='http://fonts.googleapis.com/css?family=Armata' rel='stylesheet' type='text/css'>
+  <link href='http://fonts.googleapis.com/css?family=PT+Sans' rel='stylesheet' type='text/css'>
 </head>
 <body>
 <div id="nav">
@@ -31,7 +33,7 @@
 	</div>
 	<div id="background">
 		<h1>Background</h1>
-		<p>Instagram has a lot of publicly available photos, and with their many filters, these photos frequently take on a certain hue or a prevailing color. One popular way for people to display photos is to create one photo using a mosaic of much smaller photos where each of the smaller photos acts as “pixels” in the overall photo. With the popularity of Instagram, we believe that we can make very high quality photo mosaics using publically available photos.</p>
+		<p>Instagram has a lot of publicly available photos, and with their many filters, these photos frequently take on a certain hue or a prevailing color. One popular way for people to display photos is to create one photo using a mosaic of much smaller photos where each of the smaller photos acts as &ldquo;pixels&rdquo; in the overall photo. With the popularity of Instagram, we believe that we can make very high quality photo mosaics using publically available photos.</p>
 		<p>As we have discussed before, photo computation can be done in parallel over the many individual pixels in a photo. With a mosaic, each sub-photo can be computed in parallel with the final result compiled together after all sub-photos have been computed. We can also benefit from parallelism by storing image data into separate caches which will contain those photos that match a given pattern, color, or brightness. Figure 1 shows an example of how we will cut up an input image into equal sized squares to create a mosaic.</p>
 		<h2>Pseudo-Code</h2>
 		<pre>
@@ -48,9 +50,9 @@ Load provided image
 	</div>
 	<div id="challenge">
 		<h1>The Challenge</h1>
-		<p>There is a lot of computation happening here. First of all we need to load the images into memory to process them. As we know from Project 2 this is a very bandwidth limited process. This is furthered by the fact that the photos requested from Instagram will most likely need to be downloaded locally to process which limits us to the speed of the network and Instagram’s servers. We also have the issue of space as Instagram’s database of images is far larger than we would ever hope to store in disk, let alone memory. We will need to come up with a method to process the images and store much smaller chunks of data to search through when doing our mosaic creation computation. Even going through this database will likely take a very long time, so we will need to find opportunities for caching when sub-photos with similar patterns come up. </p>
+		<p>There is a lot of computation happening here. First of all we need to load the images into memory to process them. As we know from Project 2 this is a very bandwidth limited process. This is furthered by the fact that the photos requested from Instagram will most likely need to be downloaded locally to process which limits us to the speed of the network and Instagram’s servers. We also have the issue of space as Instagram&rsquo;s database of images is far larger than we would ever hope to store in disk, let alone memory. We will need to come up with a method to process the images and store much smaller chunks of data to search through when doing our mosaic creation computation. Even going through this database will likely take a very long time, so we will need to find opportunities for caching when sub-photos with similar patterns come up. </p>
 		<h2>Potential Problems</h2>
-		<p>One potential issue we are concerned about is the speed at which the Instagram API responds. We hope to use "recent" photos in our mosaic, so the resulting image will be different each time, but this may not be possible with network delay. If this is the case we will need to store a large amount of photos somewhere on disk and access those instead. This poses a problem of storage and whether or not it is feasible to store such a large amount of photos on AWS. We may need to have a way that processes photos, stores information about them, and then simply stores the location of the photo on instagrams servers. This way we could do all of the photo computation very quickly, and only request photo downloads when we need to.</p>
+		<p>One potential issue we are concerned about is the speed at which the Instagram API responds. We hope to use &ldquo;recent&rdquo; photos in our mosaic, so the resulting image will be different each time, but this may not be possible with network delay. If this is the case we will need to store a large amount of photos somewhere on disk and access those instead. This poses a problem of storage and whether or not it is feasible to store such a large amount of photos on AWS. We may need to have a way that processes photos, stores information about them, and then simply stores the location of the photo on instagrams servers. This way we could do all of the photo computation very quickly, and only request photo downloads when we need to.</p>
 	</div>
 	<div id="resources">
 		<h1>Resources</h1>
@@ -66,7 +68,44 @@ Load provided image
 	</div>
 	<div id="schedule">
 		<h1>Schedule</h1>
-		<p>Our schedule</p>
+		<div id="scheduleTab">
+      <div class="week">
+      <div class="left">Week 1</div>
+      <div class="right">(4/7 - 4/13)</div>
+      <div class="details left"><em>Plan to achieve</em></div>
+      <div class="details right">In this first week we plan on finishing the proposal write up, coming up with the best language (Python / C++) to complete this project with, and familiarize ourselves with the image manipulation methods in the respective language and the Instagram API.</div>
+      </div>
+      <div class="week">
+      <div class="left">Week 2</div>
+      <div class="right">(4/14 - 4/20)</div>
+      <div class="left details"><em>Plan to achieve</em></div>
+      <div class="right details">As this is carnival week, we will set our expectation for completion relatively low to other weeks. By Wednesday 4/17 we hope to have a way to input images, cut that image into sections, and an interface to send that data to the GPU.</div>
+      </div>
+      <div class="week">
+      <div class="left">Week 3</div>
+      <div class="right">(4/21 - 4/27)</div>
+      <div class="left details"><em>Plan to achieve</em></div>
+      <div class="right details">This is the week we want to get a lot of heavy lifting done. By the end of this week (and the midpoint of the project timeline) we hope to have a way to compute image data from the images uploaded to the GPU, and a way to store that data. </div>
+      </div>
+      <div class="week">
+      <div class="left">Week 4</div>
+      <div class="right">(4/28 - 5/4)</div>
+      <div class="left details"><em>Plan to achieve</em></div>
+      <div class="right details">By the end of week 4 we will have the GPU returning image results that match given patterns from our database of processed image data. We will come up with a way to compare these returned images to the cross section of the original image to visually inspect how well our algorithm is performing.</div>
+      </div>
+      <div class="week">
+      <div class="left">Week 5</div>
+      <div class="right">(5/5 - 5/11)</div>
+      <div class="left details"><em>Plan to achieve</em></div>
+      <div class="right details">We have left much less for this week as we expect as problems arise for our timeline to be pushed back. By the end of this week we want to have a final project completed. This includes the final steps of actually piecing our image back together (most likely done in parallel with access to a shared image buffer).</div>
+      </div>
+      <div class="week">
+      <div class="left">Week 6</div>
+      <div class="right">(5/12 - 5/13)</div>
+      <div class="left details"><em>Plan to achieve</em></div>
+      <div class="right details">A complete and polished project to present to the class on Monday.</div>
+      </div>
+    </div>
 	</div>
 </div>
 </body>
