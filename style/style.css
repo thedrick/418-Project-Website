@@ -135,21 +135,20 @@ a:hover {
   border: 0px;
 }
 
-ul.resourceList {
-	position: relative;
-	background-color: transparent;
+#resources ul, #goals ul {
+  position: static;
+  background: transparent;
 	text-align: left;
 	color: #000;
 	overflow: inherit;
 }
 
-ul.resourceList > li {
+#resources li, #goals li {
 	color: #000;
   display: list-item;
-	list-style-type: circle;
   list-style: square;
 	font: 12px 'Armata', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-	line-height: 115%;
+	line-height: 150%;
 }
 #resources a {
 	color: #75BF00;
