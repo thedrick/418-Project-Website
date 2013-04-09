@@ -18,28 +18,43 @@ h2 {
 	margin: 5px 0;
 }
 
+#goals ul {
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
 pre {
 	font: 14px 'Courier New', 'Courier';
 	line-height: 140%;
 }
 
-ul {
+#nav {
+	z-index: 10;
+}
+
+#nav a {
+	z-index: 10;
+}
+
+#nav ul {
 	list-style: none;
 	width: 100%;
 	text-align: center;
 	background-color: #333;
 	position: fixed;
 	top: 0;
+	left: 0;
+	margin-left: 0;
 }
 
-li {
+#nav li {
 	display: inline-block;
 	margin: 15px 25px;
 	text-decoration: none;
 	color: white;
 }
 
-a {
+#nav a {
 	color: white;
 	text-decoration: none;
 	font: 16px 'Armata', 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -51,8 +66,8 @@ p {
 	line-height: 150%;
 }
 
-a:hover {
-	color: #75BF00;
+#nav a:hover {
+	color: #00BF00;
 }
 
 .pictures {
@@ -77,17 +92,26 @@ a:hover {
 	text-align: center;
 }
 
-#sidenav li:first-child {
+#sidenav a:first-child {
 	border-top: none;
 }
 
-#sidenav li {
+#sidenav a {
 	display: block;
-	padding: 10px 0;
+	padding: 8px 0;
 	margin: 0;
-	border-bottom: 1px solid #eee;
+	border-bottom: 1px solid #ccc;
 	border-top: 1px solid #333;
 	text-align: center;
+	background: rgb(255,255,255); /* Old browsers */
+	background: -moz-linear-gradient(top,  rgba(255,255,255,1) 0%, rgba(246,246,246,1) 47%, rgba(237,237,237,1) 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,1)), color-stop(47%,rgba(246,246,246,1)), color-stop(100%,rgba(237,237,237,1))); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top,  rgba(255,255,255,1) 0%,rgba(246,246,246,1) 47%,rgba(237,237,237,1) 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top,  rgba(255,255,255,1) 0%,rgba(246,246,246,1) 47%,rgba(237,237,237,1) 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top,  rgba(255,255,255,1) 0%,rgba(246,246,246,1) 47%,rgba(237,237,237,1) 100%); /* IE10+ */
+	background: linear-gradient(to bottom,  rgba(255,255,255,1) 0%,rgba(246,246,246,1) 47%,rgba(237,237,237,1) 100%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#ededed',GradientType=0 ); /* IE6-9 */
+	font: 15px 'Armata', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 #sidenav ul {
@@ -100,6 +124,9 @@ a:hover {
 	border-radius: 6px;
 	overflow: hidden;
 	border: 1px solid #333;
+	-moz-box-shadow: 0 2px 3px 0 #666;
+	-webkit-box-shadow: 0 2px 3px 0 #666;
+	box-shadow: 0 2px 3px 0 #666;
 }
 
 #sidenav a {
@@ -107,8 +134,18 @@ a:hover {
 }
 
 #sidenav a:hover {
-	color: #75BF00;
+	color: #00AF00;
+background: rgb(229,229,229); /* Old browsers */
+background: -moz-linear-gradient(top,  rgba(229,229,229,1) 0%, rgba(246,246,246,1) 36%, rgba(201,201,201,1) 100%); /* FF3.6+ */
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(229,229,229,1)), color-stop(36%,rgba(246,246,246,1)), color-stop(100%,rgba(201,201,201,1))); /* Chrome,Safari4+ */
+background: -webkit-linear-gradient(top,  rgba(229,229,229,1) 0%,rgba(246,246,246,1) 36%,rgba(201,201,201,1) 100%); /* Chrome10+,Safari5.1+ */
+background: -o-linear-gradient(top,  rgba(229,229,229,1) 0%,rgba(246,246,246,1) 36%,rgba(201,201,201,1) 100%); /* Opera 11.10+ */
+background: -ms-linear-gradient(top,  rgba(229,229,229,1) 0%,rgba(246,246,246,1) 36%,rgba(201,201,201,1) 100%); /* IE10+ */
+background: linear-gradient(to bottom,  rgba(229,229,229,1) 0%,rgba(246,246,246,1) 36%,rgba(201,201,201,1) 100%); /* W3C */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e5e5e5', endColorstr='#c9c9c9',GradientType=0 ); /* IE6-9 */
+	overflow: hidden;
 }
+
 #scheduleTab .left {
   background: #f0f0f0;
   float: left;
@@ -134,28 +171,41 @@ a:hover {
   padding: 6px;
   border: 0px;
 }
-
-#resources ul, #goals ul {
-  position: static;
-  background: transparent;
-	text-align: left;
-	color: #000;
-	overflow: inherit;
-}
-
-#resources li, #goals li {
-	color: #000;
-  display: list-item;
-  list-style: square;
-	font: 12px 'Armata', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+.right.details {
 	line-height: 150%;
 }
-#resources a {
-	color: #75BF00;
-  font-size: 12px;
+
+ul {
+	width: auto;
+	height: auto;
+	background-color: transparent;
+	text-align: left;
+	color: black;
+	list-style-type: square;
+	list-style: square;
+	margin-left: 20px;
+	z-index: 0;
 }
 
-#resources a:hover {
-	color: #759F00;
+li {
+	color: black;
+	font: 14px 'PT Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	line-height: 150%;
+	margin: 5px 0;
+	list-style-type: square;
+	list-style: square;
+	display: list-item;
+	z-index: 0;
+}
+
+a {
+	color: #009F00;
+	font: 14px 'PT Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	text-decoration: none;
+	z-index: 0;
+}
+
+ul a:hover {
+	color: #00BF00;
 }
 
