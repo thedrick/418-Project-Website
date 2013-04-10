@@ -18,6 +18,15 @@ h2 {
 	margin: 5px 0;
 }
 
+#header {
+	font: 28px 'Armata', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	margin-bottom: 20px;
+}
+.subtitle {
+	font: 18px 'PT Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	margin-top: 5px;
+}
+
 #goals ul {
 	margin-top: 10px;
 	margin-bottom: 10px;
