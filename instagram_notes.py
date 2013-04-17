@@ -12,6 +12,9 @@ api = InstagramAPI(client_id="4aa0a8ef77b34a0d8e3ddf2d97523f22", client_secret="
 popular_media = api.media_popular(count=20)
 media = popular_media[0]
 
+# search for media
+api.media_search(q, count, lat, lng, min_timestamp, max_timestamp)
+
 # fields
 media.caption
 media.comments
