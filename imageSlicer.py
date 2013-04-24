@@ -1,6 +1,6 @@
 import os
 import sys
-import Image
+from PIL import Image
 
 # raised when num_slices is not a divisor of instagram_wh
 class InstagramSizeException(Exception):
@@ -99,10 +99,42 @@ class ImageSlicer:
                                           average_subheight * i + average_subheight))
             sub_averages.append(reduce_average(list(cropped.getdata())))
             averages.append(sub_averages)
-    return [item for sublist in averages for item in sublist]
+    print len(averages)
+#    print averages
+
+    flattened = []
+    test_size = len(averages)/cut_size**2
+    what_size = self.num_slices*cut_size**2
+    xxx = 0
+
+    while (xxx != self.num_slices):
+      for k in range(what_size*xxx, what_size*(xxx+1)):
+        if (k % (cut_size**2) == 0 or k % (cut_size**2) == 1 or k % (cut_size**2) == 2):
+          flattened.append(averages[k])
+        '''
+          flattened.insert((k/test_size)+k, averages[k])
+        if (k % 9 == 3 or k % 9 == 4 or k % 9 == 5):
+          flattened.insert((k/test_size)+test_size+k, averages[k])
+        if (k % 9 == 6 or k % 9 == 7 or k % 9 == 8):
+          flattened.insert((k/test_size)+(2*test_size)+k, averages[k])
+        '''
+      
+      for m in range(what_size*xxx, what_size*(xxx+1)):
+        if (m % (cut_size**2) == 3 or m % (cut_size**2) == 4 or m % (cut_size**2) == 5) :
+          flattened.append(averages[m])
+      
+      for n in range(what_size*xxx, what_size*(xxx+1)):
+        if (n % (cut_size**2) == 6 or n % (cut_size**2) == 7 or n % (cut_size**2) == 8) :
+          flattened.append(averages[n])
+      print xxx
+      xxx+=1
+    #print flattened
+    
+    print len(flattened)
+    return [item for sublist in flattened for item in sublist]
 
 
-slicer = ImageSlicer("images/393947749265729731_275905793.jpg", 51)
+slicer = ImageSlicer("images/440815184852773597_299169057.jpg", 51)
 
 # slicer.average_RGB()
 # exit(0)
