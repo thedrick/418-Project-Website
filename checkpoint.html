@@ -58,7 +58,7 @@
 	<div id="progress">
     <h1>Work Completed So Far</h1>
     <p>It took unexpectedly long to install PyCUDA, but we have thus far been able to implement all of what we hoped to achieve in Week 2, which gives a way to input images and cut the image into square sections. We have also decided on a way to determine an &ldquo;image match&rdquo;, in which we will further divide each square section into a 3x3 grid and average the RGB values in each of those grid squares to find the closest match. This method would definitely be better than averaging all values in the larger squares, as we realized a split black and white block could return a grey average, which is not what we actually want.</p>
-    <p>Now in this week, we have used the method just described above and can now successfully find closest image matches for each square. We deviated from our original proposed schedule where we planned to work with the GPU earlier on, but our current track (reflected in our updated schedule) is definitely a more reasonable approach as we should implement a serial version <i>then</i> parallelize it.</p>
+    <p>Now in this week, we have used the method just described above and can now successfully find closest image matches for each square and stich them together to replicate the original image. We deviated from our original proposed schedule where we planned to work with the GPU earlier on, but our current track (reflected in our schedule) is definitely a better approach as we should implement a serial version <i>then</i> parallelize it.</p>
   </div>
 
   <div id="newgoals">
@@ -79,7 +79,7 @@
   </div>
   <div id="preliminaryresults">
     <h1>Preliminary Results</h1>
-    <p>It currently takes <b>x seconds</b> to find the closest image match.</p>
+    <p>It currently takes <b>x seconds</b> to find the closest image match, and <b>x seconds</b> to compose an image of <b>x images</b>. These are some of the mosaics we have rendered:</p>
   </div>
   <div id="concerns">
     <h1>Issues and Concerns</h1>
