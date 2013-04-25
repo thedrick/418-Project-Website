@@ -1,6 +1,7 @@
 import os
 import sys
 from PIL import Image
+from pymongo import MongoClient
 
 # raised when num_slices is not a divisor of instagram_wh
 class InstagramSizeException(Exception):
@@ -25,8 +26,15 @@ class ImageSlicer:
     self.saveloc = saveloc
     self.slices = []
     self.rgbs = []
+    self.averages = []
     if ImageSlicer.instagram_wh % num_slices != 0:
       raise InstagramSizeException("num_slices is not a divisor of 612")
+    self.client = MongoClient()
+
+  def get_averages(self):
+    if (self.averages == []):
+      self.average_RGB()
+    return self.averages
 
   # slice image into pieces of equal size defined by num_slices
   def slice(self):
@@ -99,6 +107,7 @@ class ImageSlicer:
                                           average_subheight * i + average_subheight))
             sub_averages.append(reduce_average(list(cropped.getdata())))
             averages.append(sub_averages)
+    self.averages = averages
     
     flattened = []
     block_size = self.num_slices*cut_size**2
@@ -120,20 +129,13 @@ class ImageSlicer:
     return [item for sublist in flattened for item in sublist]
 
 
-slicer = ImageSlicer("images/440815042347915310_25264853.jpg", 1)
+# slicer = ImageSlicer("images/318960010740589992_182714056.jpg", 1)
 
-# slicer.average_RGB()
-# exit(0)
+# # # slicer.average_RGB()
+# # # exit(0)
 
-averages = slicer.average_RGB()
-
-img = Image.new('RGB', (3, 3))
-# for x in range(36):
-#   for y in range(36):
-#     img_data[y,x] = averages[(x * 36) + y]
-
-img.putdata(averages)
-img.save("./test3.jpg")
+# img.putdata(averages)
+# img.save("./test3.jpg")
 # # Image manip
 # img = Image.open(path)
 # # get a list of all rgb values in the image
