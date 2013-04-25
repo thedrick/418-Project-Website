@@ -120,14 +120,14 @@ class ImageSlicer:
     return [item for sublist in flattened for item in sublist]
 
 
-slicer = ImageSlicer("images/440815042347915310_25264853.jpg", 51)
+slicer = ImageSlicer("images/440815042347915310_25264853.jpg", 1)
 
 # slicer.average_RGB()
 # exit(0)
 
 averages = slicer.average_RGB()
 
-img = Image.new('RGB', (153, 153))
+img = Image.new('RGB', (3, 3))
 # for x in range(36):
 #   for y in range(36):
 #     img_data[y,x] = averages[(x * 36) + y]
