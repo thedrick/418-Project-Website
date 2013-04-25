@@ -6,29 +6,17 @@ from instagram.client import InstagramAPI
 from time import sleep
 
 words = [
-  "ocean",
-  "beach",
-  "sky",
-  "skyy",
-  "sunset",
-  "sunrise",
-  "flame",
-  "fire",
-  "blue",
-  "aqua",
-  "cyan",
-  "navy",
-  "sweater",
-  "cerulean",
-  "green",
-  "grass",
-  "tree",
-  "kiwi",
-  "pine",
-  "forest",
-  "landscape",
-  "mountain",
-  "hills"
+  "winter",
+  "scarf",
+  "hat",
+  "gloves",
+  "boots",
+  "shoes",
+  "cold",
+  "ice",
+  "water",
+  "waves",
+  "sand"
 ]
 
 api = InstagramAPI(client_id="4aa0a8ef77b34a0d8e3ddf2d97523f22", client_secret="da88550123c74ddb9de9d7a3e0bb088d")

@@ -49,8 +49,11 @@ if __name__ == '__main__':
   subimages = [averages[i:i+9] for i in range(0, len(averages), 9)]
   final_images = []
   for img in subimages:
+    start_one = time.clock()
     distances = map(lambda x: totalDistance(img, x), all_images)
     minIndex = min(enumerate(distances), key=itemgetter(1))[0]
+    end_one = time.clock()
+    print "Time taken to find one image is %f" % (end_one - start_one)
     final_images.append(image_paths[minIndex])
     if not reuse:
       all_images[minIndex] = []
