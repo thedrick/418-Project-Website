@@ -96,7 +96,7 @@
 
   <div id="concerns">
     <h1>Issues and Concerns</h1>
-    <p>Though this will only be an issue if we reach our 'Hope to Achieve' goal of dynamically grabbing images from Instagram, we are concerned about the latency of those requests.</p>
+    <p>Though this will only be an issue if we reach our 'Hope to Achieve' goal of dynamically grabbing images from Instagram, we are concerned about the latency of those requests. Currently we have a large database of computed values for images that exist on disk, making it very easy for us to search through and find closest matches. If we are grabing photos from Instagram at runtime, we will still need to process them first before running the matching computation. This will dramatically reduce our speed, but is luckily another operation that is possible to do in parallel. Another concern we have is whether or not it makes sense to actually do image processing on the GPU since it will be very challenging to get a lot of image data on the GPUs memory efficiently.</p>
   </div>
   <br /><br /><br /><br /><br />
 </div>
