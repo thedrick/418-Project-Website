@@ -6,16 +6,11 @@ from instagram.client import InstagramAPI
 from time import sleep
 
 words = [
-  "sepia",
-  "wood",
-  "antique",
-  "dresser",
-  "amish",
-  "horse",
-  "bear",
-  "chocolate",
-  "dove",
-  "hershey"
+  "penis",
+  "cock",
+  "dick",
+  "porn",
+  "gaysex"
 ]
 
 api = InstagramAPI(client_id="4aa0a8ef77b34a0d8e3ddf2d97523f22", client_secret="da88550123c74ddb9de9d7a3e0bb088d")
@@ -29,7 +24,7 @@ for tag in words:
       print "Saving image at with caption " + media.caption.text
     except:
       print "No caption"
-    img = Image.open(StringIO(urllib.urlopen(url).read())).save("images/" + str(media.id) + ".jpg")
+    img = Image.open(StringIO(urllib.urlopen(url).read())).save("test/" + str(media.id) + ".jpg")
   
   
   
