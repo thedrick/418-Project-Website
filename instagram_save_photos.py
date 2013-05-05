@@ -6,11 +6,6 @@ from instagram.client import InstagramAPI
 from time import sleep
 
 words = [
-  "penis",
-  "cock",
-  "dick",
-  "porn",
-  "gaysex"
 ]
 
 api = InstagramAPI(client_id="4aa0a8ef77b34a0d8e3ddf2d97523f22", client_secret="da88550123c74ddb9de9d7a3e0bb088d")

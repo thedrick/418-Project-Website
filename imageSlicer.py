@@ -125,7 +125,7 @@ class ImageSlicer:
         if (n % (cut_size**2) == 6 or n % (cut_size**2) == 7 or n % (cut_size**2) == 8) :
           flattened.append(averages[n])          
       h+=1
-    
+    print flattened
     return [item for sublist in flattened for item in sublist]
 
 
