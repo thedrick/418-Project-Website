@@ -152,12 +152,11 @@ int totalDistance(vector<RGB> a1, vector<RGB> a2) {
 
 int main(int argc, char **argv) {
   InitializeMagick(*argv);
-  if (argc < 3) {
-    cout << "usage: " << argv[0] << " <image path> <save path>\n";
+  if (argc < 2) {
+    cout << "usage: " << argv[0] << " <image path>\n";
     return 1;
   }
   ImageSlicer slicer(argv[1], 51);
-  string savepath = argv[2];
   DBClientConnection c;
   c.connect("localhost");
   vector <vector <RGB> > dbImageColors;
@@ -225,7 +224,7 @@ int main(int argc, char **argv) {
   }
   printf("Attempting to montage the image\n");
   montageImages(&finalMontage, images.begin(), images.end(), montage);
-  writeImages(finalMontage.begin(), finalMontage.end(), savepath);
+  writeImages(finalMontage.begin(), finalMontage.end(), "montage.jpg");
 }
 
 
