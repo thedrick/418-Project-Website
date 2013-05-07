@@ -51,7 +51,7 @@ private:
 ImageSlicer::ImageSlicer (string src, int n) {
   imgsrc = src;
   numSlices = n;
-  cutSize = 3;
+  cutSize = 48;
   slices = vector< vector<Image> > (51);
   for (int x = 0; x < n; x++) {
     slices[x] = vector<Image> (51);

@@ -6,7 +6,7 @@ from instagram.client import InstagramAPI
 from time import sleep
 
 #words = ['sopretty', 'spring', 'summer', 'flowerstagram', 'flowersofinstagram', 'flowerstyles_gf', 'flowerslovers', 'flowerporn', 'botanical', 'floral', 'florals', 'insta_pick_blossom', 'flowermagic', 'instablooms', 'bloom', 'blooms', 'botanical', 'floweroftheday']
-words = ['pages', 'paper', 'kindle', 'nook', 'library', 'author', 'bestoftheday', 'bookworm', 'readinglist', 'love', 'photooftheday', 'imagine', 'plot', 'climax', 'story', 'literature', 'literate', 'stories', 'words', 'text']
+words = ['dance', 'dancer', 'dancing', 'dancerecital', 'music', 'song', 'songs', 'ballet', 'dancers', 'dancefloor', 'danceshoes', 'instaballet', 'studio', 'instadance', 'workout', 'cheer', 'choreography', 'flexible', 'flexibility']
 
 api = InstagramAPI(client_id="4aa0a8ef77b34a0d8e3ddf2d97523f22", client_secret="da88550123c74ddb9de9d7a3e0bb088d")
 total = 0
@@ -23,7 +23,11 @@ try:
         print "trying page %d for tag %s" % (x,tag)
         api.tag_recent_media(count=100, max_id=maxid, tag_name=tag)
       for media in popular_media:
-        url = media.images['standard_resolution'].url
+        curimg = media.images['standard_resolution']
+        # dont save images that aren't 612 x 612
+        if (curimg.width != 612 || curimg.height != 612):
+          continue
+        url = curimg.url
         maxid = media.id
         try:
           Image.open(StringIO(urllib.urlopen(url).read())).save("images/" + str(media.id) + ".jpg")
