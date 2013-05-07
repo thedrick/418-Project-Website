@@ -20,10 +20,9 @@ class ImageSlicer:
   # default width and height of instagram photos.
   instagram_wh = 612
 
-  def __init__(self, imgsrc, num_slices=12, saveloc="pieces/"):
+  def __init__(self, imgsrc, num_slices=12):
     self.imgsrc = imgsrc
     self.num_slices = num_slices
-    self.saveloc = saveloc
     self.slices = []
     self.rgbs = []
     self.averages = []

@@ -13,7 +13,10 @@ used in image matching for creating photo mosaics
 #include <math.h>
 #include <climits>
 #include <list>
+#include <omp.h>
 #include "mongo/client/dbclient.h"
+#include "CycleTimer.h"
+
 using namespace std;
 using namespace Magick;
 using namespace mongo;
@@ -24,6 +27,8 @@ struct RGB {
   int blue;
 };
 
+// object which holds an image and slices it into pieces to
+// extract average RGB values for each subpiece.
 class ImageSlicer {
   string imgsrc; // source of the input image
   int numSlices; // number of slices in x and y direction
@@ -54,6 +59,8 @@ ImageSlicer::ImageSlicer (string src, int n) {
   sourceImage = Image(src);
 }
 
+// slice the input image into a grid of numSlices x numSlices
+// and puts these subimages into an array for use later.
 void ImageSlicer::slice() {
   Image img = sourceImage;
   int width = img.columns();
@@ -74,6 +81,9 @@ void ImageSlicer::slice() {
   return;
 }
 
+// get a list of RGB values from the input image. This takes each slice
+// and cuts it into a 3x3 grid and finds the average RGB value in each
+// of the grid sections. Thus each sub image is represented by 9 RGB values
 void ImageSlicer::calculateRGBValues() {
   int subwidth = 612 / numSlices;
   int subheight = 612 / numSlices;
@@ -152,20 +162,22 @@ int totalDistance(vector<RGB> a1, vector<RGB> a2) {
 
 int main(int argc, char **argv) {
   InitializeMagick(*argv);
-  if (argc < 2) {
-    cout << "usage: " << argv[0] << " <image path>\n";
+  if (argc < 3) {
+    cout << "usage: " << argv[0] << " <image path> <save path>\n";
     return 1;
   }
   ImageSlicer slicer(argv[1], 51);
+  string savepath = argv[2];
   DBClientConnection c;
   c.connect("localhost");
   vector <vector <RGB> > dbImageColors;
   vector <string> dbImageSources;
   auto_ptr<DBClientCursor> cursor = c.query("instagram_photomosaic.image_pool", BSONObj());
   // load all the stuff from the database to check against.
+  double dbstart = CycleTimer::currentSeconds();
   while (cursor->more()) {
     BSONObj obj = cursor->next();
-    dbImageSources.push_back(obj.getStringField("imgsrc"));
+    dbImageSources.push_back(obj.getStringField("smallsrc"));
     BSONObjIterator fields (obj.getObjectField("averages"));
     vector <RGB> curRGBs;
     while (fields.more()) {
@@ -182,10 +194,16 @@ int main(int argc, char **argv) {
     // add vector of 9 rgbs to large vector
     dbImageColors.push_back(curRGBs);
   }
+  double dbend = CycleTimer::currentSeconds();
+  printf("Time to read in DB %f\n", (dbend - dbstart));
   // average values of the input image. This is an array of a bunch of RGBs
   // where they are grouped in 9s in order.
+  double avgstart = CycleTimer::currentSeconds();
   vector<RGB> averages = slicer.getAverages();
+  double avgend = CycleTimer::currentSeconds();
+  printf("Time to find averages of input image %f\n", (avgend - avgstart));
   vector<string> finalImages;
+  double imgstart = CycleTimer::currentSeconds();
   for (size_t i = 0; i < averages.size(); i += 9) {
     // current value of the minimum distance and it's index.
     int minIndex = 0;
@@ -208,23 +226,26 @@ int main(int argc, char **argv) {
     vector<RGB> empty;
     dbImageColors[minIndex] = empty;
   }
+  double imgend = CycleTimer::currentSeconds();
+  printf("Time to compute image matches %f\n", (imgend - imgstart));
   list <Image> finalMontage;
   Montage montage;
   montage.tile("51x51");
   montage.geometry("48x48");
   vector<Image> images;
-  for (size_t n = 0; n < finalImages.size(); n++) {
+  double montagestart = CycleTimer::currentSeconds();
+  for (int n = 0; n < (int)finalImages.size(); n++) {
     string filename = finalImages[n];
     Image mosaicImage(filename);
-    mosaicImage.resize("48x48");
-    if (n % 50 == 0) {
-      printf("Opening image %zu\n", n);
+    if (n % 100 == 0) {
+      printf("Opening image %d\n", n);
     }
     images.push_back(mosaicImage);
   }
-  printf("Attempting to montage the image\n");
   montageImages(&finalMontage, images.begin(), images.end(), montage);
-  writeImages(finalMontage.begin(), finalMontage.end(), "montage.jpg");
+  writeImages(finalMontage.begin(), finalMontage.end(), savepath);
+  double montageend = CycleTimer::currentSeconds();
+  printf("Time to create and write montage to file %f\n", (montageend - montagestart));
 }
 
 

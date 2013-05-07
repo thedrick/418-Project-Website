@@ -14,6 +14,8 @@ used in image matching for creating photo mosaics
 #include <climits>
 #include <list>
 #include "mongo/client/dbclient.h"
+#include "CycleTimer.h"
+
 using namespace std;
 using namespace Magick;
 using namespace mongo;
@@ -164,6 +166,7 @@ int main(int argc, char **argv) {
   vector <string> dbImageSources;
   auto_ptr<DBClientCursor> cursor = c.query("instagram_photomosaic.image_pool", BSONObj());
   // load all the stuff from the database to check against.
+  double dbstart = CycleTimer::currentSeconds();
   while (cursor->more()) {
     BSONObj obj = cursor->next();
     dbImageSources.push_back(obj.getStringField("imgsrc"));
@@ -183,10 +186,16 @@ int main(int argc, char **argv) {
     // add vector of 9 rgbs to large vector
     dbImageColors.push_back(curRGBs);
   }
+  double dbend = CycleTimer::currentSeconds();
+  printf("Time to read in DB %f\n", (dbend - dbstart));
   // average values of the input image. This is an array of a bunch of RGBs
   // where they are grouped in 9s in order.
+  double avgstart = CycleTimer::currentSeconds();
   vector<RGB> averages = slicer.getAverages();
+  double avgend = CycleTimer::currentSeconds();
+  printf("Time to find averages of input image %f\n", (avgend - avgstart));
   vector<string> finalImages;
+  double imgstart = CycleTimer::currentSeconds();
   for (size_t i = 0; i < averages.size(); i += 9) {
     // current value of the minimum distance and it's index.
     int minIndex = 0;
@@ -209,11 +218,14 @@ int main(int argc, char **argv) {
     vector<RGB> empty;
     dbImageColors[minIndex] = empty;
   }
+  double imgend = CycleTimer::currentSeconds();
+  printf("Time to compute image matches %f\n", (imgend - imgstart));
   list <Image> finalMontage;
   Montage montage;
   montage.tile("51x51");
   montage.geometry("48x48");
   vector<Image> images;
+  double montagestart = CycleTimer::currentSeconds();
   for (size_t n = 0; n < finalImages.size(); n++) {
     string filename = finalImages[n];
     Image mosaicImage(filename);
@@ -226,6 +238,8 @@ int main(int argc, char **argv) {
   printf("Attempting to montage the image\n");
   montageImages(&finalMontage, images.begin(), images.end(), montage);
   writeImages(finalMontage.begin(), finalMontage.end(), savepath);
+  double montageend = CycleTimer::currentSeconds();
+  printf("Time to create and write montage to file %f\n", (montageend - montagestart));
 }
 
 

@@ -3,3 +3,7 @@
 *.swp
 images/
 images/*
+smallImages/*
+smallImages/
+mosaics/*
+mosaics/

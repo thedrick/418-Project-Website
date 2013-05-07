@@ -18,8 +18,10 @@ def processImages():
     mapper = lambda x: (x[0][0], x[0][1], x[0][2])
     averages = map(mapper, averages)
     print "Adding img %s to db with averages %s" % (img, str(averages))
+    imgsmall = img.replace("images", "smallImages").replace(".jpg", "small.jpg")
     dbitem = {
       "imgsrc" : img,
+      "srcsmall" : imgsmall,
       "averages" : averages
     }
     image_pool.insert(dbitem)
