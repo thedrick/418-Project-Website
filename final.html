@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html>
 <head>
@@ -50,7 +51,7 @@ Load provided image
   
   <div id="approach">
     <h1>Approach</h1>
-    <p>We originally planned to use Python for this project (see <a href="index.html">proposal</a>), and parallelize the computations for image matches using PyCUDA, but ran into quite a few roadblocks on that path. Our serial Python version of generating image mosaics with a database of ~6,000 images required over 3 minutes of computation time. We realized this time would only grow exponentially if we wanted to use a database of over 100,000 images. We decided to continue for the time being and utilize PyCUDA to start attempting to speed up the implementation before adding any more images. After reading extensive documentation and &ldquo;successfully&rdquo; running our code, the result we achieved was crashing our computer. At this point, we decided to start from scratch with C++.</p>
+    <p>We originally planned to use Python for this project (see <a href="proposal.html">proposal</a>), and parallelize the computations for image matches using PyCUDA, but ran into quite a few roadblocks on that path. Our serial Python version of generating image mosaics with a database of ~6,000 images required over 3 minutes of computation time. We realized this time would only grow exponentially if we wanted to use a database of over 100,000 images. We decided to continue for the time being and utilize PyCUDA to start attempting to speed up the implementation before adding any more images. After reading extensive documentation and &ldquo;successfully&rdquo; running our code, the result we achieved was crashing our computer. At this point, we decided to start from scratch with C++.</p>
     
     <p>The work required to partition our images is done within our <code>imageSlicer</code> class, which utilizes the <a href="http://imagemagick.org">ImageMagick</a> library for image manipulation. This class defines functions that slice the input image into subimages, and divides these subimages into the grids that we average over for image matching. Each of these grid tiles is then averaged into one (R,G,B) value, giving us multiple data points per subimage to find the overall closest match. We are currently exploring the best grid size to maximize match and minimize overhead. 
     </p>
@@ -70,19 +71,19 @@ Load provided image
     
     <p>When comparing our final mosiacs to our <a href="checkpoint.html#preliminaryresults">preliminary results</a>, we see a significant improvement in details and colors (click the mosaiced image on the right to view the full size image):</p>
     
-    <div class="checkpoint pictures">
+    <div class="final pictures">
       <img src="img/jellyfish.jpg" alt="jellyfish" />
       <img src="img/jellyfish_mosaic_unique.jpg" alt="jellyfishmosaic" />
       <a href="img/output_jellyfish2.jpg" ><img src="img/output_jellyfish2_small.jpg" alt="jellyfishmosaic" /></a>
     </div>
-    <div class="checkpoint pictures">
+    <div class="final pictures">
       <img src="img/shore.jpg" alt="shore" />
-      <img src="img/girl_mosaic_unique.jpg" alt="shoremosaic" />
+      <img src="img/shore_mosaic_unique.jpg" alt="shoremosaic" />
       <a href="img/output_shore.jpg"><img src="img/output_shore_small.jpg" alt="shoremosaic" /></a>
     </div>
-    <div class="checkpoint pictures">
+    <div class="final pictures">
       <img src="img/icecream.jpg" alt="icecream" />
-      <img src="" alt="icecreammosaic" />
+      <img src="img/icecream_mosaic.jpg" alt="icecreammosaic" />
       <a href="img/output_icecream.jpg"><img src="img/output_icecream_small.jpg" alt="icecreammosaic" /></a>
     </div>
   </div>
@@ -91,17 +92,38 @@ Load provided image
     
     <table>
       <tr>
-        <th>Time (&darr;)</th>
-        <th>Serial</th>
+        <th></th>
+        <th>Python Serial</th>
+        <th>C++ Serial</th>
         <th>libjpeg</th>
-        <th>pthreads</th>
+        <th>pthreads (4)</th>
         <th>CUDA</th>
       </tr>
      
       <tr>
+        <th>Image Match</th>
+        <td>.2s</td>
+        <td>.05s</td>
         <td></td>
+        <td>.1s</td>
+        <td></td>
+      </tr>
+      
+      <tr>
+        <th>Total Time</th>
+        <td>520s</td>
         <td>135s</td>
         <td></td>
+        <td>68s</td>
+        <td></td>
+      </tr>
+      
+      <tr>
+        <th>Speedup</th>
+        <td>xx</td>
+        <td>1x</td>
+        <td></td>
+        <td>2x</td>
         <td></td>
       </tr>
     </table></p>
