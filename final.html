@@ -50,12 +50,18 @@ Load provided image
   
   <div id="approach">
     <h1>Approach</h1>
-    <p>We originally planned to use Python for this project (see <a href="index.html">proposal</a>), and parallelize the computations for image matches using PyCUDA, but ran into quite a few roadblocks on that path. Our serial Python version of generating image mosaics with a database of ~6,000 images required over 3 minutes of computation time. We realized this amount would only grow exponentially if we wanted to use a database of over 100,000 images. We decided to continue for the time being and utilize PyCUDA to start attempting to speed up the implementation before adding any more images. After reading extensive documentation and getting our code to run, the result we achieved was crashing our computer. At this point, we decided to start from scratch with C++.</p>
+    <p>We originally planned to use Python for this project (see <a href="index.html">proposal</a>), and parallelize the computations for image matches using PyCUDA, but ran into quite a few roadblocks on that path. Our serial Python version of generating image mosaics with a database of ~6,000 images required over 3 minutes of computation time. We realized this time would only grow exponentially if we wanted to use a database of over 100,000 images. We decided to continue for the time being and utilize PyCUDA to start attempting to speed up the implementation before adding any more images. After reading extensive documentation and &ldquo;successfully&rdquo; running our code, the result we achieved was crashing our computer. At this point, we decided to start from scratch with C++.</p>
     
-    <p>The work required to partition our images is done with <code>imageSlicer</code>, which is a class we wrote which utilizes the <a href="http://imagemagick.org">ImageMagick</a> library for image manipulation. This class defines functions that slice the input image into subimages, and divides these subimages into the grids that we average over for image matching. Each of these grid tiles is then averaged into one (R,G,B) value, giving us multiple data points per subimage to find the overall closest match. We are currently exploring the best grid size to maximize match and minimize overhead. 
+    <p>The work required to partition our images is done within our <code>imageSlicer</code> class, which utilizes the <a href="http://imagemagick.org">ImageMagick</a> library for image manipulation. This class defines functions that slice the input image into subimages, and divides these subimages into the grids that we average over for image matching. Each of these grid tiles is then averaged into one (R,G,B) value, giving us multiple data points per subimage to find the overall closest match. We are currently exploring the best grid size to maximize match and minimize overhead. 
     </p>
     
-    <p>The final mosaic is composed in <code>serial_pm</code>. For each subimage, we calculate the closest match from our image database, given by &radic;(r<sub>1</sub> - r<sub>2</sub>)<sup>2</sup> + (g<sub>1</sub> - g<sub>2</sub>)<sup>2</sup> + (b<sub>1</sub> - b<sub>2</sub>)<sup>2</sup>). Finding the closest (R,G,B) values is equivalent to finding the shortest path between one point and all other given points in 3D space. To ensure uniqueness in our images as we discussed earlier, we remove an image from the database whenever it has been found as a closest match. In our current version, we find all image matches first and then montage the images with the returned paths. We originally used ImageMagick's <a href="http://www.imagemagick.org/Magick++/Montage.html">Montage class</a> to tile the images, but then wrote our own using <a href="http://libjpeg.sourceforge.net/">libjpeg</a>, since ImageMagick's class is not user-parallelizable and carried unneeded features.</p>
+    <p>The final mosaic is currently composed in <code>serial_pm</code>. Finding the closest (R,G,B) values is equivalent to finding the shortest path between one point and all other given points in 3D space. For each subimage, we calculate the closest match from our image database, given by &radic;((r<sub>1</sub> - r<sub>2</sub>)<sup>2</sup> + (g<sub>1</sub> - g<sub>2</sub>)<sup>2</sup> + (b<sub>1</sub> - b<sub>2</sub>)<sup>2</sup>).  To ensure uniqueness in our images, as we discussed earlier, we remove an image from the database whenever it has been found as a closest match. In this serial version, we find all image matches first and then montage the images with the returned paths. We first used ImageMagick's <a href="http://www.imagemagick.org/Magick++/Montage.html">Montage class</a> to tile the images.</p>
+
+    <p>The first optimization was to write our own image tiler using <a href="http://libjpeg.sourceforge.net/">libjpeg</a>, since ImageMagick's class is not user-parallelizable and carried unneeded features. Our new image tiler class accepts an image path and an index integer indicating its position in the final mosaic.</p>
+    
+    <p>The next optimization was to parallelize finding closest matches for each subimage. We are first using four pthreads, responsible for a separate part of the subimage array. Due to the CPU-intensive nature of finding matches, this achieved a <b>2x speedup</b>.</p>
+    
+    <p>Aftering pthreads, we will potentially try to use CUDA to make these computations faster and achieve an even greater speedup. </p>
   </div>
   
   <div id="results">
@@ -66,19 +72,39 @@ Load provided image
     
     <div class="checkpoint pictures">
       <img src="img/jellyfish.jpg" alt="jellyfish" />
+      <img src="img/jellyfish_mosaic_unique.jpg" alt="jellyfishmosaic" />
       <a href="img/output_jellyfish2.jpg" ><img src="img/output_jellyfish2_small.jpg" alt="jellyfishmosaic" /></a>
     </div>
     <div class="checkpoint pictures">
-      <img src="img/shore.jpg" alt="girl" />
-      <a href="img/output_shore.jpg"><img src="img/output_shore_small.jpg" alt="girlmosaic" /></a>
+      <img src="img/shore.jpg" alt="shore" />
+      <img src="img/girl_mosaic_unique.jpg" alt="shoremosaic" />
+      <a href="img/output_shore.jpg"><img src="img/output_shore_small.jpg" alt="shoremosaic" /></a>
     </div>
     <div class="checkpoint pictures">
-      <img src="img/icecream.jpg" alt="shore" />
-      <a href="img/output_icecream.jpg"><img src="img/output_icecream_small.jpg" alt="shoremosaic" /></a>
+      <img src="img/icecream.jpg" alt="icecream" />
+      <img src="" alt="icecreammosaic" />
+      <a href="img/output_icecream.jpg"><img src="img/output_icecream_small.jpg" alt="icecreammosaic" /></a>
     </div>
   </div>
 
-    <p>We are now working on parallelizing finding image matches and tiling the images.</p>
+    <p>We are now working on parallelizing finding image matches and tiling the images. The following table will demonstrate the steps we are taking and their respective speedups:
+    
+    <table>
+      <tr>
+        <th>Time (&darr;)</th>
+        <th>Serial</th>
+        <th>libjpeg</th>
+        <th>pthreads</th>
+        <th>CUDA</th>
+      </tr>
+     
+      <tr>
+        <td></td>
+        <td>135s</td>
+        <td></td>
+        <td></td>
+      </tr>
+    </table></p>
   
   <div id="studentwork">
     <h1>Division of Work</h1>

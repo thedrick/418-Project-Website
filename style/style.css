@@ -85,8 +85,9 @@ p {
 
 .pictures {
 	overflow: auto;
-	width: 550px;
+	width: 815px;
 	margin: 0 auto;
+  padding: 0;
 }
 
 .pictures img {
@@ -256,6 +257,10 @@ a {
 ul a:hover {
 	color: #00BF00;
 }
+table {
+  border: 1px #222 solid;
+  margin: 8px auto 5px;
+}
 
 #studentwork img {
 	margin: 15px auto;
@@ -271,4 +276,8 @@ ul a:hover {
 	display: block;
 	margin: 0 auto 20px auto;
 	text-align: center;
+}
+th, td {
+  padding: 5px;
+  text-align: center;
 }
