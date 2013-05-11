@@ -257,3 +257,18 @@ ul a:hover {
 	color: #00BF00;
 }
 
+#studentwork img {
+	margin: 15px auto;
+	display: block; 
+}
+
+#background img {
+	display: block;
+	margin: 0 auto;
+}
+
+.cent {
+	display: block;
+	margin: 0 auto 20px auto;
+	text-align: center;
+}
