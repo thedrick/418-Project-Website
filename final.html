@@ -33,7 +33,7 @@
 
     <img src="img/zoompixel.png" alt="zoompixel" /><span class="cent">Figure 1: A diagram of how we split up the pixels in our image and tiles</span>
 
-    <p>The next challenge comes from determining the best number of pieces to cut the image and subimages into to try and find matches. We initially started with cutting the input image into 51 x 51 tiles and each tile into another 3 x 3 grid to do image matcing on. When we started looking for exact matches, we realized that cutting the overall image into a much larger number of tiles would increase the probability that an exact match could be found. We have currently run exact matches on tiles of size 3 x 3 with very high success rate in finding exact matches. We plan to expand this to different dimensions to see which dimensions give back the best results in comparison to the tile size.</p>
+    <p>The next challenge comes from determining the best number of pieces to cut the image and subimages into to match to. We started with cutting the input image into 51 x 51 subimages and subimage tile into another 3 x 3 grid. When we started looking for exact matches, we realized that cutting the overall image into a much larger number of subimages would increase the probability that an exact match could be found. We have currently run matches on subimages with size 3 x 3 with very high success rate in finding exact matches. We plan to expand this to different dimensions to see which ones return the best results.</p>
 
     <h2>High Level Algorithm</h2>
     <pre>
@@ -58,11 +58,11 @@ Load provided image
     
     <p>The final mosaic is currently composed in <code>serial_pm</code>. Finding the closest (R,G,B) values is equivalent to finding the shortest path between one point and all other given points in 3D space. For each subimage, we calculate the closest match from our image database, given by &radic;((r<sub>1</sub> - r<sub>2</sub>)<sup>2</sup> + (g<sub>1</sub> - g<sub>2</sub>)<sup>2</sup> + (b<sub>1</sub> - b<sub>2</sub>)<sup>2</sup>).  To ensure uniqueness in our images, as we discussed earlier, we remove an image from the database whenever it has been found as a closest match. In this serial version, we find all image matches first and then montage the images with the returned paths. We first used ImageMagick's <a href="http://www.imagemagick.org/Magick++/Montage.html">Montage class</a> to tile the images.</p>
 
-    <p>The first optimization was to write our own image tiler using <a href="http://libjpeg.sourceforge.net/">libjpeg</a>, since ImageMagick's class is not user-parallelizable and carried unneeded features. Our new image tiler class accepts an image path and an index integer indicating its position in the final mosaic.</p>
+    <p>The first optimization was to write our own image tiler using <a href="http://libjpeg.sourceforge.net/">libjpeg</a>, since ImageMagick's class is not user-parallelizable and carried unneeded features. Our new image tiler class accepts an image path and an index integer indicating its position in the final mosaic, so we don't have to write images serially.</p>
     
-    <p>The next optimization was to parallelize finding closest matches for each subimage. We are first using four pthreads, responsible for a separate part of the subimage array. Due to the CPU-intensive nature of finding matches, this achieved a <b>2x speedup</b>.</p>
+    <p>The next optimization was to parallelize finding closest matches for each subimage. We are first using four pthreads, responsible for a separate part of the subimage array (we hope to abstract this to a master-worker model). Due to the CPU-intensive nature of finding matches, the pthreads achieved a <b>2x speedup</b>.</p>
     
-    <p>Aftering pthreads, we will potentially try to use CUDA to make these computations faster and achieve an even greater speedup. </p>
+    <p>Aftering trying these pthreads, we will potentially try to use CUDA to make these computations faster and achieve an even greater speedup. We will also look into reusing data for the images.</p>
   </div>
   
   <div id="results">
