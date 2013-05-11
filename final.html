@@ -10,13 +10,9 @@
 <body>
   <div id="nav">
   <ul>
-    <li><a href="index.html">Project Proposal</a></li>
+    <li><a href="proposal.html">Project Proposal</a></li>
     <li><a href="checkpoint.html">Checkpoint Report</a></li>
     <li><a href="final.html">Final Report</a></li>
-  </ul>
-</div>
-<div id="sidenav">
-  <ul>
   </ul>
 </div>
 <div id="content">
@@ -33,6 +29,8 @@
     <p>Instagram has a huge database of photos, many of which have filters applied that give them a similar hue, saturation, brightness, etc. Photomosaics are a popular way to display a photo using many subphotos where each subphoto acts as a "pixel" in the overall image. Photomosiacs of Instagram photos could be very intersting, and with the filters applied, make very high quality photomosaics. This also brought out another topic to be explored in the form of data compression. Professor Kayvon challenged us with trying to find out if new images uploaded to Instagram could use old image data to recreate this new image pixel for pixel without storing any new data.</p>
 
     <p>Photomosaics are trivially parallelizable because each subimage of an input image can be done in parallel. If you include the requirement that each photo tile must be unique, things become a bit trickier, as modifying an array of images while other threads are accessing them can still produce duplicate images. When creating photomosaics for aesthetics it is much better to remove duplicates as it provides a much more interesting result. When figuring out whether or not it is possible to find an image that matches pixel for pixel, having duplicates is necessary to ensure we consider all images in the database.</p>
+
+    <img src="img/zoompixel.png" alt="zoompixel" /><span class="cent">Figure 1: A diagram of how we split up the pixels in our image and tiles</span>
 
     <p>The next challenge comes from determining the best number of pieces to cut the image and subimages into to try and find matches. We initially started with cutting the input image into 51 x 51 tiles and each tile into another 3 x 3 grid to do image matcing on. When we started looking for exact matches, we realized that cutting the overall image into a much larger number of tiles would increase the probability that an exact match could be found. We have currently run exact matches on tiles of size 3 x 3 with very high success rate in finding exact matches. We plan to expand this to different dimensions to see which dimensions give back the best results in comparison to the tile size.</p>
 
@@ -62,16 +60,33 @@ Load provided image
   
   <div id="results">
     <h1>Results</h1>
-    <p>Given that our database now has over 100,000 images, our final results have improved in terms of aesthetics. In terms of other matters, such as serial computation time, the results have, unsurprisingly, significantly increased. However, given the <a href="checkpoint.html#preliminaryresults">preliminary results</a>, were obtained from the Python implementation, there was a natural speedup when switching to C++. It now takes on average <b>0.05 seconds</b> to find the closest image match, <b>130 seconds</b> to find all matches, and <b>5 seconds</b> to compose the final mosaic.</p
+    <p>Given that our database now has over 100,000 images, our final results have improved in terms of aesthetics. In terms of other matters, such as serial computation time, the results have, unsurprisingly, significantly increased. However, given the <a href="checkpoint.html#preliminaryresults">preliminary results</a>, were obtained from the Python implementation, there was a natural speedup when switching to C++. It now takes on average <b>0.05 seconds</b> to find the closest image match, <b>130 seconds</b> to find all matches, and <b>5 seconds</b> to compose the final mosaic.</p>
     
-    <p>When comparing our final mosiacs to our <a href="checkpoint.html#preliminaryresults">preliminary results</a>, we see a significant improvement in details and colors:</p>
+    <p>When comparing our final mosiacs to our <a href="checkpoint.html#preliminaryresults">preliminary results</a>, we see a significant improvement in details and colors (click the mosaiced image on the right to view the full size image):</p>
     
-    <p>We are now working on parallelizing finding image matches and tiling the images.</p>
+    <div class="checkpoint pictures">
+      <img src="img/jellyfish.jpg" alt="jellyfish" />
+      <a href="img/output_jellyfish2.jpg" ><img src="img/output_jellyfish2_small.jpg" alt="jellyfishmosaic" /></a>
+    </div>
+    <div class="checkpoint pictures">
+      <img src="img/shore.jpg" alt="girl" />
+      <a href="img/output_shore.jpg"><img src="img/output_shore_small.jpg" alt="girlmosaic" /></a>
+    </div>
+    <div class="checkpoint pictures">
+      <img src="img/icecream.jpg" alt="shore" />
+      <a href="img/output_icecream.jpg"><img src="img/output_icecream_small.jpg" alt="shoremosaic" /></a>
+    </div>
   </div>
+
+    <p>We are now working on parallelizing finding image matches and tiling the images.</p>
   
   <div id="studentwork">
     <h1>Division of Work</h1>
-    <p>We pair programmed and worked on this entire project together. Tyler handled more of the database and Instagram scripts and Stephanie worked with the image tiler.</p>
+    <p>We pair programmed and worked on this entire project together. Tyler handled more of the database and Instagram scripts and Stephanie worked with the image tiler. In fact we are currently sitting next to each other writing this. Here is a mosaiced picture of our beautiful faces :)
+    </p>
+    <p>
+      <img src="img/output_us.jpg" />
+    </p>
   </div>
   <br /><br /><br /><br /><br />
 </div>
