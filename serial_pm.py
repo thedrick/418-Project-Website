@@ -39,7 +39,7 @@ if __name__ == '__main__':
   pool = image_pool.find()
   pool_items = [x for x in pool]
   all_images = [x["averages"] for x in pool_items]
-  image_paths = [x["smallsrc"] for x in pool_items]
+  image_paths = [x["imgsrc"] for x in pool_items]
 
   reuse = args.reuse
   # BEGIN TIMER
@@ -62,7 +62,7 @@ if __name__ == '__main__':
   output = Image.new('RGB', (2448, 2448))
   for y in range(len(imageGrid)):
     for x in range(len(imageGrid)):
-      im = Image.open(imageGrid[y][x])
+      im = Image.open(imageGrid[y][x]).resize((48, 48))
       output.paste(im, (x * 48, y * 48))
   end = time.clock()
   print "It took %f seconds to compute" % (end - start)

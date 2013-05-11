@@ -104,7 +104,9 @@ class ImageSlicer:
                                           average_subheight * i,
                                           average_subwidth * j + average_subwidth,
                                           average_subheight * i + average_subheight))
-            sub_averages.append(reduce_average(list(cropped.getdata())))
+            reduced = reduce_average(list(cropped.getdata()))
+            # print reduced
+            sub_averages.append(reduced)
             averages.append(sub_averages)
     self.averages = averages
     

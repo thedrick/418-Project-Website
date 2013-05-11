@@ -1,65 +1,46 @@
-/*
-ImageSlicer.cpp designed to reproduce the results of
-ImageSlicer.py and slice up a target image into sections
-used in image matching for creating photo mosaics
-*/
-
 #include <iostream>
-#include <string>
 #include <vector>
 #include <string>
 #include <sstream>
-#include <Magick++.h>
 #include <math.h>
 #include <climits>
 #include <list>
 #include "mongo/client/dbclient.h"
 #include "CycleTimer.h"
 
+#include "imageSlicer.h"
+
 using namespace std;
 using namespace Magick;
 using namespace mongo;
 
-struct RGB {
-  int red;
-  int green;
-  int blue;
-};
-
-class ImageSlicer {
-  string imgsrc; // source of the input image
-  int numSlices; // number of slices in x and y direction
-  int cutSize; // number of sub slices to make from each image 
-  vector< vector< RGB > > rgbs; // vector to store RGB values of pieces
-  vector<RGB> averages; // vector to store average rgbs
-  vector< vector< Image > > slices; // image slices.
-  Image sourceImage;
-
-public:
-  ImageSlicer(string imgsrc, int numSlices);
-  vector<RGB> getAverages();
-  vector< vector< Image > > getSlices();
-
-private:
-  void slice();
-  void calculateRGBValues();
-};
-
-ImageSlicer::ImageSlicer (string src, int n) {
+ImageSlicer::ImageSlicer (string src, int n, int cSize) {
   imgsrc = src;
   numSlices = n;
-  cutSize = 3;
-  slices = vector< vector<Image> > (51);
+  cutSize = cSize;
+  slices = vector< vector<Image> > (n);
   for (int x = 0; x < n; x++) {
-    slices[x] = vector<Image> (51);
+    slices[x] = vector<Image> (n);
   }
   sourceImage = Image(src);
+  if (sourceImage.columns() != 612 || sourceImage.rows() != 612) {
+    printf("Trying to slice an image that is not 612 x 612 at %s\n", src.c_str());
+    exit(1);
+  }
 }
 
+// slice the input image into a grid of numSlices x numSlices
+// and puts these subimages into an array for use later.
 void ImageSlicer::slice() {
   Image img = sourceImage;
   int width = img.columns();
   int height = img.rows(); // size of instagram photo
+
+  if (numSlices == 1) {
+    Image piece = img;
+    slices[0][0] = img;
+    return;
+  }
 
   int subwidth = width / numSlices;
   int subheight = height / numSlices;
@@ -76,6 +57,9 @@ void ImageSlicer::slice() {
   return;
 }
 
+// get a list of RGB values from the input image. This takes each slice
+// and cuts it into a 3x3 grid and finds the average RGB value in each
+// of the grid sections. Thus each sub image is represented by 9 RGB values
 void ImageSlicer::calculateRGBValues() {
   int subwidth = 612 / numSlices;
   int subheight = 612 / numSlices;
@@ -112,6 +96,7 @@ void ImageSlicer::calculateRGBValues() {
           rgb.red = red;
           rgb.green = green;
           rgb.blue = blue;
+          // printf("Red: %d, Green: %d, Blue: %d\n", red, green, blue);
           averages.push_back(rgb);
         }
       }
@@ -129,118 +114,3 @@ vector<RGB> ImageSlicer::getAverages() {
   calculateRGBValues();
   return averages;
 }
-
-int square(int x) {
-  return x * x;
-}
-
-int RGBdistance(RGB t1, RGB t2) {
-  int red = square(t1.red - t2.red);
-  int green = square(t1.green - t2.green);
-  int blue = square(t1.blue - t2.blue);
-  return (int)sqrt(red + green + blue);
-}
-
-int totalDistance(vector<RGB> a1, vector<RGB> a2) {
-  if (a2.size() != 9) {
-    return 255 * 255;
-  }
-  int dist = 0;
-  for (size_t i = 0; i < a1.size(); i++) {
-    dist += RGBdistance(a1[i], a2[i]);
-  }
-  return dist;
-}
-
-int main(int argc, char **argv) {
-  InitializeMagick(*argv);
-  if (argc < 3) {
-    cout << "usage: " << argv[0] << " <image path> <save path>\n";
-    return 1;
-  }
-  ImageSlicer slicer(argv[1], 51);
-  string savepath = argv[2];
-  DBClientConnection c;
-  c.connect("localhost");
-  vector <vector <RGB> > dbImageColors;
-  vector <string> dbImageSources;
-  auto_ptr<DBClientCursor> cursor = c.query("instagram_photomosaic.image_pool", BSONObj());
-  // load all the stuff from the database to check against.
-  double dbstart = CycleTimer::currentSeconds();
-  while (cursor->more()) {
-    BSONObj obj = cursor->next();
-    dbImageSources.push_back(obj.getStringField("imgsrc"));
-    BSONObjIterator fields (obj.getObjectField("averages"));
-    vector <RGB> curRGBs;
-    while (fields.more()) {
-      vector<BSONElement> elems = fields.next().Array();
-      int red = elems[0].Int();
-      int green = elems[1].Int();
-      int blue = elems[2].Int();
-      RGB rgb;
-      rgb.red = red;
-      rgb.green = green;
-      rgb.blue = blue;
-      curRGBs.push_back(rgb);
-    }
-    // add vector of 9 rgbs to large vector
-    dbImageColors.push_back(curRGBs);
-  }
-  double dbend = CycleTimer::currentSeconds();
-  printf("Time to read in DB %f\n", (dbend - dbstart));
-  // average values of the input image. This is an array of a bunch of RGBs
-  // where they are grouped in 9s in order.
-  double avgstart = CycleTimer::currentSeconds();
-  vector<RGB> averages = slicer.getAverages();
-  double avgend = CycleTimer::currentSeconds();
-  printf("Time to find averages of input image %f\n", (avgend - avgstart));
-  vector<string> finalImages;
-  double imgstart = CycleTimer::currentSeconds();
-  for (size_t i = 0; i < averages.size(); i += 9) {
-    // current value of the minimum distance and it's index.
-    int minIndex = 0;
-    int minVal = INT_MAX;
-    vector<RGB> current;
-    // grab the next 9 values (corresponds to a subimage)
-    for (int j = 0; j < 9; j++) {
-      current.push_back(averages[i + j]);
-    }
-    for (size_t k = 0; k < dbImageColors.size(); k++) {
-      // get distance from current subimage to current image from db.
-      int dist = totalDistance(current, dbImageColors[k]);
-      if (dist < minVal) {
-        minIndex = k;
-        minVal = dist;
-      }
-    }
-    finalImages.push_back(dbImageSources[minIndex]);
-    // replace minIndex with empty vector to remove values and avoid duplicates.
-    vector<RGB> empty;
-    dbImageColors[minIndex] = empty;
-  }
-  double imgend = CycleTimer::currentSeconds();
-  printf("Time to compute image matches %f\n", (imgend - imgstart));
-  list <Image> finalMontage;
-  Montage montage;
-  montage.tile("51x51");
-  montage.geometry("48x48");
-  vector<Image> images;
-  double montagestart = CycleTimer::currentSeconds();
-  for (size_t n = 0; n < finalImages.size(); n++) {
-    string filename = finalImages[n];
-    Image mosaicImage(filename);
-    mosaicImage.resize("48x48");
-    if (n % 50 == 0) {
-      printf("Opening image %zu\n", n);
-    }
-    images.push_back(mosaicImage);
-  }
-  printf("Attempting to montage the image\n");
-  montageImages(&finalMontage, images.begin(), images.end(), montage);
-  writeImages(finalMontage.begin(), finalMontage.end(), savepath);
-  double montageend = CycleTimer::currentSeconds();
-  printf("Time to create and write montage to file %f\n", (montageend - montagestart));
-}
-
-
-

@@ -1,20 +1,54 @@
 <!doctype html>
 <html>
 <head>
-	<title>Final Report</title>
-	<link rel="stylesheet" type="text/css" href="style/reset.css">
-	<link rel="stylesheet" type="text/css" href="style/style.css">
+  <title>Final Report</title>
+  <link rel="stylesheet" type="text/css" href="style/reset.css">
+  <link rel="stylesheet" type="text/css" href="style/style.css">
+  <link href='http://fonts.googleapis.com/css?family=Armata' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=PT+Sans' rel='stylesheet' type='text/css'>
 </head>
 <body>
-	<div id="nav">
-	<ul>
-		<li><a href="index.html">Project Proposal</a></li>
-		<li><a href="checkpoint.html">Checkpoint Report</a></li>
-		<li><a href="final.html">Final Report</a></li>
-	</ul>
+  <div id="nav">
+  <ul>
+    <li><a href="index.html">Project Proposal</a></li>
+    <li><a href="checkpoint.html">Checkpoint Report</a></li>
+    <li><a href="final.html">Final Report</a></li>
+  </ul>
+</div>
+<div id="sidenav">
+  <ul>
+  </ul>
 </div>
 <div id="content">
-	<p>This page due May 13, 2013.</p>
+  <div id="header">
+    Parallelization of Instagram Photomosaics and a Study of Photo Tile Reutilization
+    <div class="subtitle">15-418 Final Project by Stephanie Yeung (syeung1) and Tyler Hedrick (thedrick)</div>
+  </div>
+  <div id="finalsummary">
+    <h1>Summary</h1>
+    <p>We have implemented a parallel program to create photomosaics using Instagram photos, and have explored how to reuse data in the subtiles to save image storage space.</p>
+  </div>
+  <div id="background">
+    <h1>Backgroun</h1>
+    <p>Instagram has a huge database of photos, many of which have had filters applied to them to give them a similar hue, saturation, brightness, etc. Photomosaics are a popular way to display a photo using many sub photos where each sub photo acts as a "pixel" in the overall image. We realized that photomosiacs of Instagram photos could be very intersting, and with the filters applied, make very high quality photomosaics. This also brought out another topic to be explored in the form of data compression. Professor Kayvon challenged us with trying to find out if new images uploaded to Instagram could use old image data to recreate this new image pixel for pixel without storing any new data.</p>
+
+    <p>Photomosaics are trivially parallelizable because each subimage of an input image can be done in parallel. If you include the requirement that each photo tile must be unique, things become a bit trickier, as modifying an array of images while other threads are accessing them can still produce duplicate images. When creating photomosaics for aesthetics it is much better to remove duplicates as it provides a much more interesting result. When figuring out whether or not it is possible to find an image that matches pixel for pixel, having duplicates is necessary to ensure we consider all images in the database.</p>
+
+    <p>The next challenge comes from determining the best number of pieces to cut the image and subimages into to try and find matches. We initially started with cutting the input image into 51 x 51 tiles and each tile into another 3 x 3 grid to do image matcing on. When we started looking for exact matches, we realized that cutting the overall image into a much larger number of tiles would increase the probability that an exact match could be found. We have currently run exact matches on tiles of size 3 x 3 with very high success rate in finding exact matches. We plan to expand this to different dimensions to see which dimensions give back the best results in comparison to the tile size.</p>
+
+    <h2>High Level Algorithm</h2>
+    <pre>
+Load provided image
+    Slice image into squares of equal size
+    for each sub-image in parallel:
+        slice sub-image into grid
+        store average RGB values of grid pieces into an array
+        for each stored photo in parallel:
+            compare RGB values with grid and update current best match
+        syncthreads
+        add photo pixels to shared final image buffer
+      </pre>
+  </div>
 </div>
 </body>
 </html>

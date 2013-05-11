@@ -8,14 +8,22 @@ from pymongo import MongoClient
 
 
 def resize_images():
+  count = 0
   imgs = glob.glob("images/*.jpg")
+  smalls = glob.glob("smallImages/*.jpg")
   for img in imgs:
+    smallimg = img.replace("images/", "smallImages/")
+    if (smallimg in smalls):
+      print "Skipping image at %s" % img
+      continue
     large = Image.open(img)
     small = large.resize((48, 48))
-    smallimg = img.replace("images/", "").replace(".jpg", "small.jpg")
-    small.save("smallImages/" + smallimg)
+    small.save(smallimg)
+    count += 1
+    if (count % 50 == 0):
+      print "Converted and saved the %dth image" % count
 
-#resize_images()
+resize_images()
 
 def add_smallpath_to_db():
   client = MongoClient();
@@ -29,4 +37,4 @@ def add_smallpath_to_db():
     count += 1
   print count
 
-add_smallpath_to_db()
+# add_smallpath_to_db()

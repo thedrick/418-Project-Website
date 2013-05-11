@@ -8,16 +8,16 @@ import glob
 def processImages():
   client = MongoClient()
   db = client.instagram_photomosaic
-  image_pool = db.image_pool
+  image_pool = db.image_pool_new
   imgs = glob.glob("images/*.jpg")
   for img in imgs:
     if (len(list(image_pool.find({"imgsrc" : img}))) != 0):
       continue
+    print "Adding img %s to db" % img
     slicer = ImageSlicer(img, 1)
     averages = slicer.get_averages()
     mapper = lambda x: (x[0][0], x[0][1], x[0][2])
     averages = map(mapper, averages)
-    print "Adding img %s to db with averages %s" % (img, str(averages))
     imgsmall = img.replace("images", "smallImages").replace(".jpg", "small.jpg")
     dbitem = {
       "imgsrc" : img,
@@ -26,7 +26,7 @@ def processImages():
     }
     image_pool.insert(dbitem)
 
-#processImages()
+processImages()
 
 def processImages12():
   client = MongoClient()
@@ -53,7 +53,7 @@ def processImages12():
       print "Inserted %d photo" % count
     count += 1
 
-processImages12()
+#processImages12()
 
 def processImagesFull48():
   client = MongoClient()
