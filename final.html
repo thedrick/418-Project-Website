@@ -29,8 +29,8 @@
     <p>We have implemented a parallel program to create photomosaics using Instagram photos, and have explored how to reuse data in the subtiles to save image storage space.</p>
   </div>
   <div id="background">
-    <h1>Backgroun</h1>
-    <p>Instagram has a huge database of photos, many of which have had filters applied to them to give them a similar hue, saturation, brightness, etc. Photomosaics are a popular way to display a photo using many sub photos where each sub photo acts as a "pixel" in the overall image. We realized that photomosiacs of Instagram photos could be very intersting, and with the filters applied, make very high quality photomosaics. This also brought out another topic to be explored in the form of data compression. Professor Kayvon challenged us with trying to find out if new images uploaded to Instagram could use old image data to recreate this new image pixel for pixel without storing any new data.</p>
+    <h1>Background</h1>
+    <p>Instagram has a huge database of photos, many of which have filters applied that give them a similar hue, saturation, brightness, etc. Photomosaics are a popular way to display a photo using many subphotos where each subphoto acts as a "pixel" in the overall image. Photomosiacs of Instagram photos could be very intersting, and with the filters applied, make very high quality photomosaics. This also brought out another topic to be explored in the form of data compression. Professor Kayvon challenged us with trying to find out if new images uploaded to Instagram could use old image data to recreate this new image pixel for pixel without storing any new data.</p>
 
     <p>Photomosaics are trivially parallelizable because each subimage of an input image can be done in parallel. If you include the requirement that each photo tile must be unique, things become a bit trickier, as modifying an array of images while other threads are accessing them can still produce duplicate images. When creating photomosaics for aesthetics it is much better to remove duplicates as it provides a much more interesting result. When figuring out whether or not it is possible to find an image that matches pixel for pixel, having duplicates is necessary to ensure we consider all images in the database.</p>
 
@@ -47,8 +47,33 @@ Load provided image
             compare RGB values with grid and update current best match
         syncthreads
         add photo pixels to shared final image buffer
-      </pre>
+    </pre>
   </div>
+  
+  <div id="approach">
+    <h1>Approach</h1>
+    <p>We originally planned to use Python for this project (see <a href="index.html">proposal</a>), and parallelize the computations for image matches using PyCUDA, but ran into quite a few roadblocks on that path. Our serial Python version of generating image mosaics with a database of ~6,000 images required over 3 minutes of computation time. We realized this amount would only grow exponentially if we wanted to use a database of over 100,000 images. We decided to continue for the time being and utilize PyCUDA to start attempting to speed up the implementation before adding any more images. After reading extensive documentation and getting our code to run, the result we achieved was crashing our computer. At this point, we decided to start from scratch with C++.</p>
+    
+    <p>The work required to partition our images is done with <code>imageSlicer</code>, which is a class we wrote which utilizes the <a href="http://imagemagick.org">ImageMagick</a> library for image manipulation. This class defines functions that slice the input image into subimages, and divides these subimages into the grids that we average over for image matching. Each of these grid tiles is then averaged into one (R,G,B) value, giving us multiple data points per subimage to find the overall closest match. We are currently exploring the best grid size to maximize match and minimize overhead. 
+    </p>
+    
+    <p>The final mosaic is composed in <code>serial_pm</code>. For each subimage, we calculate the closest match from our image database, given by &radic;(r<sub>1</sub> - r<sub>2</sub>)<sup>2</sup> + (g<sub>1</sub> - g<sub>2</sub>)<sup>2</sup> + (b<sub>1</sub> - b<sub>2</sub>)<sup>2</sup>). Finding the closest (R,G,B) values is equivalent to finding the shortest path between one point and all other given points in 3D space. To ensure uniqueness in our images as we discussed earlier, we remove an image from the database whenever it has been found as a closest match. In our current version, we find all image matches first and then montage the images with the returned paths. We originally used ImageMagick's <a href="http://www.imagemagick.org/Magick++/Montage.html">Montage class</a> to tile the images, but then wrote our own using <a href="http://libjpeg.sourceforge.net/">libjpeg</a>, since ImageMagick's class is not user-parallelizable and carried unneeded features.</p>
+  </div>
+  
+  <div id="results">
+    <h1>Results</h1>
+    <p>Given that our database now has over 100,000 images, our final results have improved in terms of aesthetics. In terms of other matters, such as serial computation time, the results have, unsurprisingly, significantly increased. However, given the <a href="checkpoint.html#preliminaryresults">preliminary results</a>, were obtained from the Python implementation, there was a natural speedup when switching to C++. It now takes on average <b>0.05 seconds</b> to find the closest image match, <b>130 seconds</b> to find all matches, and <b>5 seconds</b> to compose the final mosaic.</p
+    
+    <p>When comparing our final mosiacs to our <a href="checkpoint.html#preliminaryresults">preliminary results</a>, we see a significant improvement in details and colors:</p>
+    
+    <p>We are now working on parallelizing finding image matches and tiling the images.</p>
+  </div>
+  
+  <div id="studentwork">
+    <h1>Division of Work</h1>
+    <p>We pair programmed and worked on this entire project together. Tyler handled more of the database and Instagram scripts and Stephanie worked with the image tiler.</p>
+  </div>
+  <br /><br /><br /><br /><br />
 </div>
 </body>
 </html>

@@ -3,7 +3,8 @@ body {
 }
 
 #content {
-	width: 700px;
+	width: 65%;
+  max-width: 700px;
 	margin: 90px auto 0 auto;
 	font: 12px 'Armata','Helvetica Neue', Helvetica, Arial, sans-serif;
 }
@@ -15,7 +16,7 @@ h1 {
 
 h2 {
 	font: 18px 'Armata', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-	margin: 5px 0;
+	margin: 8px 0 15px;
 }
 
 #header {
@@ -35,6 +36,9 @@ h2 {
 pre {
 	font: 14px 'Courier New', 'Courier';
 	line-height: 140%;
+}
+code {
+  font: 14px 'Courier New', 'Courier';
 }
 
 #nav {
