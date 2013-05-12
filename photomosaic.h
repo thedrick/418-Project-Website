@@ -1,36 +1,33 @@
 #ifndef __CUDA_MOSAIC_H__
 #define __CUDA_MOSAIC_H__
 
-#ifndef uint
-#define uint unsigned int
-#endif
-
-#include "circleRenderer.h"
-
-
 class CudaMosaic {
 
 private:
   int numImages;
-  int finalIndex;
   int numSlices;
   int cutSize;
 
-  float* cudaDeviceImageAverages;
-  float* cudaDeviceAllAverages;
+  int* cudaDeviceImageAverages;
+  int* cudaDeviceAllAverages;
   int* cudaDeviceImageIndex;
 
-  float* imageAverages;
-  float* allAverages;
+  int* imageAverages;
+  int* allAverages;
   int* imageIndex;
 
 public:
   CudaMosaic();
   virtual ~CudaMosaic();
 
-  void setup();
+  // void setup(int ni, int ns, int cs);
+  void setup(int ni, int ns, int cs, int* imgavg, int* allavg);
 
   void imageMatch();
+
+  // void setImageAverages(int* averages);
+  // void setAllAverages(int* averages);
+  const int* getIndices();
 };
 
 

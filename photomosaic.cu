@@ -1,6 +1,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <vector>
+#include <limits.h>
 
 #include <cuda.h>
 #include <cuda_runtime.h>
@@ -10,28 +11,61 @@
 
 struct GlobalConstants {
   int numImages;
-  int finalIndex;
   int numSlices;
   int cutSize;
 
-  float* imageAverages;
-  float* allAverages;
+  int* imageAverages;
+  int* allAverages;
   int* imageIndex;
 };
 
 __constant__ GlobalConstants cuConstMosaicParams;
 
 
-__global__ void kernelMatchImages() {
+__device__ __inline__ int square(int x) {
+  return x * x;
+}
 
+__device__ __inline__ int RGBdistance(int3 rgb1, int3 rgb2) {
+  int red = square(rgb1.x - rgb2.x);
+  int green = square(rgb1.y - rgb2.y);
+  int blue = square(rgb1.z - rgb2.z);
+  return (int)sqrt((float)(red + green + blue));
+}
+
+__global__ void kernelMatchImages() {
+  int numImages = cuConstMosaicParams.numImages;
+  int numSlices = cuConstMosaicParams.numSlices;
+  int cutSize = cuConstMosaicParams.cutSize;
+
+  int width = numSlices * cutSize;
+  int index = blockIdx.x * blockDim.x + (blockDim.y * blockIdx.y * width);
+  index += (threadIdx.x + (blockDim.x * threadIdx.y));
+
+  int imageAverageStart = index * square(cutSize) * 3;
+
+  int dist;
+  int minIndex = 0;
+  int minVal = INT_MAX;
+  for (int i = 0; i < (numImages * square(cutSize) * 3); i += (square(cutSize) * 3)) {
+    dist = 0;
+    for (int j = 0; j < square(cutSize); j += 3) {
+      int3 rgb1 = *(int3*)(&cuConstMosaicParams.imageAverages[imageAverageStart + j]);
+      int3 rgb2 = *(int3*)(&cuConstMosaicParams.allAverages[i + j]);
+      dist += RGBdistance(rgb1, rgb2);
+    }
+    if (dist < minVal) {
+      minVal = dist;
+      minIndex = (i / square(cutSize) * 3);
+    }
+  }
+  __syncthreads();
+  cuConstMosaicParams.imageIndex[index] = minIndex;
+  __syncthreads();
 }
 
 CudaMosaic::CudaMosaic() {
-  numImages = 0;
-  finalIndex = 0;
-  numSlices = 0;
-  cutSize = 0;
-
+  printf("Constructor\n");
   cudaDeviceImageAverages = NULL;
   cudaDeviceAllAverages = NULL;
   cudaDeviceImageIndex = NULL;
@@ -49,17 +83,69 @@ CudaMosaic::~CudaMosaic() {
   }
 
   if (cudaDeviceImageAverages) {
-    delete [] cudaDeviceImageAverages;
-    delete [] cudaDeviceAllAverages;
-    delete [] cudaDeviceImageIndex;
+    cudaFree(cudaDeviceImageAverages);
+    cudaFree(cudaDeviceAllAverages);
+    cudaFree(cudaDeviceImageIndex);
   }
+
+  delete [] imageAverages;
+  delete [] allAverages;
+  delete [] imageIndex;
 }
 
-void CudaMosaic::setup() {
+// void CudaMosaic::setAllAverages(int *averages) {
+//   for (int i = 0; i < (numImages * cutSize * cutSize * 3); i++) {
+//     allAverages[i] = averages[i]; 
+//   }
+// }
+
+// void CudaMosaic::setImageAverages(int *averages) {
+//   printf("Trying to set image averages\n");
+//   for (int i = 0; i < (numSlices * numSlices * cutSize * cutSize * 3); i++) {
+//     imageAverages[i] = averages[i];
+//   }
+// }
+
+const int* CudaMosaic::getIndices() {
+  printf("Copying index data from device\n");
+  cudaMemcpy(imageIndex,
+             cudaDeviceImageIndex,
+             sizeof(int) * numSlices * numSlices,
+             cudaMemcpyDeviceToHost);
+  for (int i = 0; i < numSlices * numSlices; i++) {
+    printf("Index %d found match at %d\n", i, imageIndex[i]);
+  }
+  return imageIndex;
+}
+
+void CudaMosaic::setup(int ni, int ns, int cs, int* imgavg, int* allavg) {
+  printf("Calling setup with numImages %d, numSlices %d, cutSize %d\n", ni, ns, cs);
+  numImages = ni;
+  numSlices = ns;
+  cutSize = cs;
+
+  imageAverages = new int[numSlices * numSlices * cutSize * cutSize * 3];
+  allAverages = new int[numImages * cutSize * cutSize * 3];
+  imageIndex = new int[numSlices * numSlices];
+
+  int i;
+  for (i = 0; i < (numSlices * numSlices * cutSize * cutSize * 3); i++) {
+    imageAverages[i] = imgavg[i];
+    // if (i % 100 == 0) {
+    //   printf("Setting image average %d for index %d\n", imageAverages[i], i);
+    // }
+  }
+  for (i = 0; i < (numImages * cutSize * cutSize * 3); i++) {
+    allAverages[i] = allavg[i]; 
+    // if (i % 100 == 0) {
+    //   printf("Setting all average %d for index %d\n", allAverages[i], i);
+    // }
+  }
+
   int deviceCount = 0;
   cudaError_t err = cudaGetDeviceCount(&deviceCount);
 
-  printf("Initializing CUDA for CudaRenderer\n");
+  printf("Initializing CUDA for CudaMosaic\n");
   printf("Found %d CUDA devices\n", deviceCount);
 
   for (int i=0; i<deviceCount; i++) {
@@ -71,17 +157,16 @@ void CudaMosaic::setup() {
     printf("   CUDA Cap:   %d.%d\n", deviceProps.major, deviceProps.minor);
   }
 
-  cudaMalloc(&cudaDeviceImageAverages, sizeof(float) * cutSize * 3 * (numSlices * numSlices));
-  cudaMalloc(&cudaDeviceAllAverages, sizeof(float) * cutSize * 3 * numImages);
+  cudaMalloc(&cudaDeviceImageAverages, sizeof(int) * cutSize * 3 * (numSlices * numSlices));
+  cudaMalloc(&cudaDeviceAllAverages, sizeof(int) * cutSize * 3 * numImages);
   cudaMalloc(&cudaDeviceImageIndex, sizeof(int) * numImages);
 
-  cudaMemcpy(cudaDeviceImageAverages, imageAverages, sizeof(float) * cutSize * 3 * (numSlices * numSlices), cudaMemcpyHostToDevice);
-  cudaMemcpy(cudaDeviceAllAverages, allAverages, sizeof(float) * cutSize * 3 * numImages, cudaMemcpyHostToDevice);
+  cudaMemcpy(cudaDeviceImageAverages, imageAverages, sizeof(int) * cutSize * 3 * (numSlices * numSlices), cudaMemcpyHostToDevice);
+  cudaMemcpy(cudaDeviceAllAverages, allAverages, sizeof(int) * cutSize * 3 * numImages, cudaMemcpyHostToDevice);
   cudaMemcpy(cudaDeviceImageIndex, imageIndex, sizeof(int) * numImages, cudaMemcpyHostToDevice);
 
   GlobalConstants params;
   params.numImages = numImages;
-  params.finalIndex = finalIndex;
   params.numSlices = numSlices;
   params.cutSize = cutSize;
   params.imageAverages = cudaDeviceImageAverages;
@@ -96,14 +181,8 @@ void CudaMosaic::imageMatch() {
   dim3 numBlocks(numSlices, numSlices, 1);
 
   kernelMatchImages<<<numBlocks, threadsPerBock>>>();
+  cudaThreadSynchronize();
 }
-
-
-
-
-
-
-
 
 
 
